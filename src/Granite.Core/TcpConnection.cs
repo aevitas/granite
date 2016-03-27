@@ -59,7 +59,22 @@ namespace Granite.Core
             OnConnected?.Invoke();
         }
 
-        public abstract Task DisconnectAsync();
+        public virtual async Task DisconnectAsync()
+        {
+            var awaitable = Pools.SocketAwaitable.Take();
+
+            try
+            {
+                if (!Socket.Connected)
+                    return;
+
+                await Socket.DisconnectAsync(awaitable);
+            }
+            finally
+            {
+                Pools.SocketAwaitable.Return(awaitable);
+            }
+        }
 
         public virtual Task SendMessageAsync(IMessage message)
         {
