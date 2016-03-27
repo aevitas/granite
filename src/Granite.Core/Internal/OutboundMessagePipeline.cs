@@ -16,7 +16,7 @@ namespace Granite.Core.Internal
         private readonly IConnection _connection;
         private bool _isRunning;
         private bool _isShuttingDown;
-        private TaskCompletionSource<object> _shutdownTcs; 
+        private TaskCompletionSource<object> _shutdownTcs;
         private readonly CancellationToken _cancellationToken;
         private readonly ConcurrentQueue<IMessage> _messages = new ConcurrentQueue<IMessage>();
         private static readonly int HeaderSize = Marshal.SizeOf<MessageHeader>();
@@ -78,6 +78,8 @@ namespace Granite.Core.Internal
                     Pools.SocketAwaitable.Return(awaitable);
                 }
             }
+
+            _isRunning = false;
         }
 
         private byte[] PrepareMessage(IMessage message)
@@ -86,55 +88,42 @@ namespace Granite.Core.Internal
             byte[] headerBuffer = null;
             byte[] buffer = null;
 
-            try
+
+            using (var ms = new MemoryStream())
+            using (var bw = new BinaryWriter(ms))
             {
-                using (var ms = new MemoryStream())
-                using (var bw = new BinaryWriter(ms))
-                {
-                    byte[] correlationBuffer = BufferManagerInternal.TakeBuffer(Marshal.SizeOf<Guid>());
-                    unsafe
-                    {
-                        fixed (byte* b = correlationBuffer)
-                            Marshal.StructureToPtr(message.Correlation, (IntPtr)b, false);
-                    }
-
-                    ms.Write(correlationBuffer, 0, correlationBuffer.Length);
-
-                    var serialized = Current.Serializer.Serialize(message.Content);
-
-                    bw.Write(serialized);
-
-                    messageBuffer = ms.ToArray();
-                }
-
-                var header = new MessageHeader { Length = messageBuffer.Length };
-                headerBuffer = BufferManagerInternal.TakeBuffer(HeaderSize);
-
+                byte[] correlationBuffer = new byte[Marshal.SizeOf<Guid>()];
                 unsafe
                 {
-                    fixed (byte* b = headerBuffer)
-                        Marshal.StructureToPtr(header, (IntPtr)b, false);
+                    fixed (byte* b = correlationBuffer)
+                        Marshal.StructureToPtr(message.Correlation, (IntPtr)b, false);
                 }
 
-                buffer = BufferManagerInternal.TakeBuffer(headerBuffer.Length + messageBuffer.Length);
+                ms.Write(correlationBuffer, 0, correlationBuffer.Length);
 
-                Buffer.BlockCopy(headerBuffer, 0, buffer, 0, headerBuffer.Length);
-                Buffer.BlockCopy(messageBuffer, 0, buffer, headerBuffer.Length + 1, messageBuffer.Length);
+                var serialized = Current.Serializer.Serialize(message.Content);
 
-                return buffer;
+                bw.Write(serialized);
+
+                messageBuffer = ms.ToArray();
             }
-            finally
+
+            var header = new MessageHeader { Length = messageBuffer.Length };
+            headerBuffer = new byte[HeaderSize];
+
+            unsafe
             {
-                if (messageBuffer != null)
-                    BufferManagerInternal.ReturnBuffer(messageBuffer);
-
-                if (headerBuffer != null)
-                    BufferManagerInternal.ReturnBuffer(headerBuffer);
-
-                if (buffer != null)
-                    BufferManagerInternal.ReturnBuffer(buffer);
+                fixed (byte* b = headerBuffer)
+                    Marshal.StructureToPtr(header, (IntPtr)b, false);
             }
-            
+
+            buffer = new byte[HeaderSize + messageBuffer.Length];
+
+            Buffer.BlockCopy(headerBuffer, 0, buffer, 0, HeaderSize);
+            Buffer.BlockCopy(messageBuffer, 0, buffer, HeaderSize, messageBuffer.Length);
+
+            return buffer;
+
         }
 
         public async Task StopAsync(bool finishMessages)

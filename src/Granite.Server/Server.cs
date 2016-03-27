@@ -44,6 +44,8 @@ namespace Granite.Server
             _listenerSocket.Listen(5000);
 
             _listenerTask = AcceptClientAsync();
+
+            _log.Info($"Listening for connections on {localEndPoint}");
         }
 
         private bool CanListen(IPEndPoint endPoint)
@@ -90,6 +92,7 @@ namespace Granite.Server
                     awaitable.EventArgs.AcceptSocket = null;
 
                     var client = _clientFactory();
+                    var ep = socket.RemoteEndPoint;
                     client.SetSocket(socket);
 
                     _lock.EnterWriteLock();
@@ -100,6 +103,7 @@ namespace Granite.Server
                     finally
                     {
                         _lock.ExitWriteLock();
+                        _log.Debug($"Client from {ep} successfully connected.");
                     }
                 }
             }

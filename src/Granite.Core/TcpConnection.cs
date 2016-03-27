@@ -11,8 +11,8 @@ namespace Granite.Core
 {
     public abstract class TcpConnection : IConnection
     {
-        private IncomingMessagePipeline _incomingPipeline;
-        private OutboundMessagePipeline _outboundPipeline;
+        private readonly IncomingMessagePipeline _incomingPipeline;
+        private readonly OutboundMessagePipeline _outboundPipeline;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         protected IPEndPoint RemoteEndPoint { get; private set; }
@@ -29,6 +29,11 @@ namespace Granite.Core
             };
 
             OnConnected = onConnectedCallback;
+            _incomingPipeline = new IncomingMessagePipeline(this, _cts.Token);
+            _outboundPipeline = new OutboundMessagePipeline(this, _cts.Token);
+
+            _incomingPipeline.Start();
+            _outboundPipeline.Start();
         }
 
         public virtual async Task ConnectAsync(string host, int port, int timeoutMilliseconds = 10000)
@@ -52,12 +57,7 @@ namespace Granite.Core
             {
                 Pools.SocketAwaitable.Return(awaitable);
             }
-
-            _incomingPipeline = new IncomingMessagePipeline(this, _cts.Token);
-            _outboundPipeline = new OutboundMessagePipeline(this, _cts.Token);
-
-            _incomingPipeline.Start();
-
+            
             RemoteEndPoint = Socket.RemoteEndPoint;
 
             OnConnected?.Invoke();
