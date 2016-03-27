@@ -15,7 +15,9 @@ namespace Granite.Core
         private OutboundMessagePipeline _outboundPipeline;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
-        public ISocket Socket { get; }
+        protected IPEndPoint RemoteEndPoint { get; private set; }
+
+        public ISocket Socket { get; protected set; }
 
         public Action OnConnected { get; }
 
@@ -56,6 +58,8 @@ namespace Granite.Core
 
             _incomingPipeline.Start();
 
+            RemoteEndPoint = Socket.RemoteEndPoint;
+
             OnConnected?.Invoke();
         }
 
@@ -91,6 +95,15 @@ namespace Granite.Core
         }
 
         public abstract Task OnMessageReceived(IMessage message);
+
+        public void SetSocket(ISocket socket)
+        {
+            Requires.NotNull(socket, nameof(socket));
+
+            Socket?.Dispose();
+
+            Socket = socket;
+        }
 
         #region Implementation of IDisposable
 

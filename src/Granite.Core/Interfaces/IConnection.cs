@@ -18,5 +18,7 @@ namespace Granite.Core.Interfaces
         Task ReceiveMessageAsync(Guid correlation);
 
         Task OnMessageReceived(IMessage message);
+
+        void SetSocket(ISocket socket);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using Granite.Core.Internal;
 
 namespace Granite.Core.Sockets
 {
@@ -11,6 +12,13 @@ namespace Granite.Core.Sockets
             {
                 Blocking = false
             };
+        }
+
+        public TcpSocket(Socket socket)
+        {
+            Requires.NotNull(socket, nameof(socket));
+
+            Socket = socket;
         }
 
         public Socket Socket { get; }
