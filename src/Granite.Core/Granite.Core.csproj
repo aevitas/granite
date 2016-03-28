@@ -60,7 +60,7 @@
     <Compile Include="Interfaces\IMessagePipeline.cs" />
     <Compile Include="Internal\Current.cs" />
     <Compile Include="Internal\IncomingMessagePipeline.cs" />
-    <Compile Include="Interfaces\IAwaiter.cs" />
+    <Compile Include="Interfaces\IAwaitable.cs" />
     <Compile Include="Internal\MessageHeader.cs" />
     <Compile Include="Internal\OutboundMessagePipeline.cs" />
     <Compile Include="Internal\Pools.cs" />

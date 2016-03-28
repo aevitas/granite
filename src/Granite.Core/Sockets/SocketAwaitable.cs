@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Granite.Core.Interfaces;
@@ -8,7 +7,7 @@ using Granite.Core.Internal;
 
 namespace Granite.Core.Sockets
 {
-    public sealed class SocketAwaitable : INotifyCompletion, IDisposable, IAwaiter<SocketAwaitable>
+    public sealed class SocketAwaitable : IDisposable, IAwaitable<SocketAwaitable>
     {
         private bool _isDisposed;
         private readonly Action _emptyContinuation = () => { };
