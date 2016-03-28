@@ -14,7 +14,9 @@ namespace Granite.Core.Interfaces
 
         Task SendMessageAsync(IMessage message);
 
-        Task ReceiveMessageAsync(Guid correlation);
+        Task<IMessage> ReceiveMessageAsync(Guid correlation);
+
+        Task<IMessage> SendAndAwaitResponseAsync(IMessage message);
 
         Task OnMessageReceived(IMessage message);
 

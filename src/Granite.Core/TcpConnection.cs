@@ -89,9 +89,15 @@ namespace Granite.Core
             return Task.CompletedTask;
         }
 
-        public virtual Task ReceiveMessageAsync(Guid correlation)
+        public virtual Task<IMessage> ReceiveMessageAsync(Guid correlation)
         {
             return _incomingPipeline.RegisterPromise(correlation, _cts.Token);
+        }
+
+        public virtual async Task<IMessage> SendAndAwaitResponseAsync(IMessage message)
+        {
+            await SendMessageAsync(message);
+            return await ReceiveMessageAsync(message.Correlation);
         }
 
         public abstract Task OnMessageReceived(IMessage message);

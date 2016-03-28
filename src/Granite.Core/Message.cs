@@ -15,7 +15,12 @@ namespace Granite.Core
         public Message(uint opCode, string content) : this(opCode, content, Guid.NewGuid())
         {}
 
-        internal Message(uint opCode, string content, Guid correlation)
+        public Message(uint opCode)
+        {
+            OpCode = opCode;
+        }
+
+        public Message(uint opCode, string content, Guid correlation)
         {
             Requires.NotNull(content, nameof(content));
 
