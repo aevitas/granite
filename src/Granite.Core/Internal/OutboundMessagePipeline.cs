@@ -7,8 +7,6 @@ using Granite.Core.Interfaces;
 using System.Runtime.InteropServices;
 using Granite.Core.Sockets;
 
-using static Granite.Core.Internal.Pools;
-
 namespace Granite.Core.Internal
 {
     internal class OutboundMessagePipeline : IMessagePipeline
@@ -84,11 +82,7 @@ namespace Granite.Core.Internal
 
         private byte[] PrepareMessage(IMessage message)
         {
-            byte[] messageBuffer = null;
-            byte[] headerBuffer = null;
-            byte[] buffer = null;
-
-
+            byte[] messageBuffer;
             using (var ms = new MemoryStream())
             using (var bw = new BinaryWriter(ms))
             {
@@ -108,8 +102,8 @@ namespace Granite.Core.Internal
                 messageBuffer = ms.ToArray();
             }
 
-            var header = new MessageHeader { Length = messageBuffer.Length };
-            headerBuffer = new byte[HeaderSize];
+            var header = new MessageHeader { Length = messageBuffer.Length, OpCode = message.OpCode };
+            var headerBuffer = new byte[HeaderSize];
 
             unsafe
             {
@@ -117,13 +111,12 @@ namespace Granite.Core.Internal
                     Marshal.StructureToPtr(header, (IntPtr)b, false);
             }
 
-            buffer = new byte[HeaderSize + messageBuffer.Length];
+            var buffer = new byte[HeaderSize + messageBuffer.Length];
 
             Buffer.BlockCopy(headerBuffer, 0, buffer, 0, HeaderSize);
             Buffer.BlockCopy(messageBuffer, 0, buffer, HeaderSize, messageBuffer.Length);
 
             return buffer;
-
         }
 
         public async Task StopAsync(bool finishMessages)

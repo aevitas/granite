@@ -6,6 +6,8 @@ namespace Granite.Core.Interfaces
     {
         Guid Correlation { get; }
 
+        uint OpCode { get; }
+
         object Content { get; }
     }
 }

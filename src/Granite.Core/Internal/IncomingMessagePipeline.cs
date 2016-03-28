@@ -15,7 +15,7 @@ namespace Granite.Core.Internal
         private static readonly int HeaderSize = Marshal.SizeOf<MessageHeader>();
 
         private readonly ConcurrentDictionary<Guid, TaskCompletionSource<IMessage>> _promises =
-            new ConcurrentDictionary<Guid, TaskCompletionSource<IMessage>>();   
+            new ConcurrentDictionary<Guid, TaskCompletionSource<IMessage>>();
 
         private CancellationToken _cancellationToken;
         private readonly IConnection _connection;
@@ -41,9 +41,7 @@ namespace Granite.Core.Internal
                     awaitable.EventArgs.SetBuffer(headerBuffer, 0, HeaderSize);
 
                     if (!await ReceiveChunkAsync(awaitable))
-                    {
                         break;
-                    }
 
                     MessageHeader header;
 
@@ -51,17 +49,18 @@ namespace Granite.Core.Internal
                     {
                         fixed (byte* b = awaitable.EventArgs.Buffer)
                         {
-                            var h = (MessageHeader*) b;
+                            var h = (MessageHeader*)b;
                             header = *h;
                         }
                     }
 
                     if (!IsValidHeader(header))
-                        break;
+                        continue;
 
+                    var opCode = header.OpCode;
                     var length = header.Length;
                     var buffer = Pools.BufferManagerInternal.TakeBuffer(length);
-                    
+
                     try
                     {
                         awaitable.EventArgs.SetBuffer(buffer, 0, length);
@@ -69,7 +68,7 @@ namespace Granite.Core.Internal
                         if (!await ReceiveChunkAsync(awaitable))
                             break;
 
-                        var message = await ReifyMessage(buffer);
+                        var message = await ReifyMessage(opCode, buffer);
 
                         if (CompletePromise(message.Correlation, message))
                             continue;
@@ -101,7 +100,7 @@ namespace Granite.Core.Internal
             {
                 // Log operation being aborted, socket being closed, etc.
             }
-            
+
             // Something else went wrong - ConnectionReset, OperationAborted, etc.
             if (error != SocketError.Success)
                 return false;
@@ -113,7 +112,7 @@ namespace Granite.Core.Internal
             return true;
         }
 
-        private static Task<Message> ReifyMessage(byte[] buffer)
+        private static Task<Message> ReifyMessage(uint opcode, byte[] buffer)
         {
             using (var ms = new MemoryStream(buffer))
             using (var br = new BinaryReader(ms))
@@ -125,7 +124,7 @@ namespace Granite.Core.Internal
                 {
                     fixed (byte* b = guidBuffer)
                     {
-                        var g = (Guid*) b;
+                        var g = (Guid*)b;
                         correlation = *g;
                     }
                 }
@@ -134,7 +133,7 @@ namespace Granite.Core.Internal
 
                 var obj = Current.Serializer.Deserialize(content);
 
-                return Task.FromResult(new Message(obj, correlation));
+                return Task.FromResult(new Message(opcode, obj, correlation));
             }
         }
 

@@ -8,15 +8,18 @@ namespace Granite.Core
     {
         public Guid Correlation { get; }
 
+        public uint OpCode { get; }
+
         public object Content { get;}
 
-        public Message(object content) : this(content, Guid.NewGuid())
+        public Message(uint opCode, object content) : this(opCode, content, Guid.NewGuid())
         {}
 
-        internal Message(object content, Guid correlation)
+        internal Message(uint opCode, object content, Guid correlation)
         {
             Requires.NotNull(content, nameof(content));
 
+            OpCode = opCode;
             Content = content;
             Correlation = correlation;
         }
