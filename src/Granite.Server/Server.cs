@@ -103,8 +103,9 @@ namespace Granite.Server
                     finally
                     {
                         _lock.ExitWriteLock();
-                        _log.Debug($"Client from {ep} successfully connected.");
                     }
+
+                    _log.Debug($"Client from {ep} successfully connected.");
                 }
             }
             finally

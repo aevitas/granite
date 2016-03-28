@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Logging;
 using Granite.Core.Interfaces;
 using Granite.Core.Sockets;
 
@@ -12,6 +13,7 @@ namespace Granite.Core.Internal
 {
     internal class IncomingMessagePipeline : IMessagePipeline
     {
+        private readonly ILog _log = LogManager.GetLogger("inc-msg-p");
         private static readonly int HeaderSize = Marshal.SizeOf<MessageHeader>();
 
         private readonly ConcurrentDictionary<Guid, TaskCompletionSource<IMessage>> _promises =
@@ -98,7 +100,7 @@ namespace Granite.Core.Internal
             }
             catch (ObjectDisposedException)
             {
-                // Log operation being aborted, socket being closed, etc.
+                _log.Error("ReceiveChunkAsync failed; socket was disposed!");
             }
 
             // Something else went wrong - ConnectionReset, OperationAborted, etc.

@@ -94,7 +94,7 @@ namespace Granite.Core.Internal
                 }
 
                 ms.Write(correlationBuffer, 0, correlationBuffer.Length);
-                bw.Write(message.Content);
+                bw.Write(message.Content ?? string.Empty);
 
                 messageBuffer = ms.ToArray();
             }

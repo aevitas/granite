@@ -18,6 +18,7 @@ namespace Granite.Core
         public Message(uint opCode)
         {
             OpCode = opCode;
+            Correlation = Guid.NewGuid();
         }
 
         public Message(uint opCode, string content, Guid correlation)
