@@ -10,12 +10,12 @@ namespace Granite.Core
 
         public uint OpCode { get; }
 
-        public object Content { get;}
+        public string Content { get;}
 
-        public Message(uint opCode, object content) : this(opCode, content, Guid.NewGuid())
+        public Message(uint opCode, string content) : this(opCode, content, Guid.NewGuid())
         {}
 
-        internal Message(uint opCode, object content, Guid correlation)
+        internal Message(uint opCode, string content, Guid correlation)
         {
             Requires.NotNull(content, nameof(content));
 

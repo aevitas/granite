@@ -131,9 +131,7 @@ namespace Granite.Core.Internal
 
                 var content = br.ReadString();
 
-                var obj = Current.Serializer.Deserialize(content);
-
-                return Task.FromResult(new Message(opcode, obj, correlation));
+                return Task.FromResult(new Message(opcode, content, correlation));
             }
         }
 

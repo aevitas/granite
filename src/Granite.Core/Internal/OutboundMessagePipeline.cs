@@ -94,10 +94,7 @@ namespace Granite.Core.Internal
                 }
 
                 ms.Write(correlationBuffer, 0, correlationBuffer.Length);
-
-                var serialized = Current.Serializer.Serialize(message.Content);
-
-                bw.Write(serialized);
+                bw.Write(message.Content);
 
                 messageBuffer = ms.ToArray();
             }

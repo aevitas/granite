@@ -8,6 +8,6 @@ namespace Granite.Core.Interfaces
 
         uint OpCode { get; }
 
-        object Content { get; }
+        string Content { get; }
     }
 }

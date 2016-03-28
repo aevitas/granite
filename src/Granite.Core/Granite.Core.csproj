@@ -41,10 +41,6 @@
       <HintPath>..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceModel" />
@@ -58,14 +54,11 @@
   <ItemGroup>
     <Compile Include="Exceptions.cs" />
     <Compile Include="Interfaces\IMessagePipeline.cs" />
-    <Compile Include="Internal\Current.cs" />
     <Compile Include="Internal\IncomingMessagePipeline.cs" />
     <Compile Include="Interfaces\IAwaitable.cs" />
     <Compile Include="Internal\MessageHeader.cs" />
     <Compile Include="Internal\OutboundMessagePipeline.cs" />
     <Compile Include="Internal\Pools.cs" />
-    <Compile Include="Serialization\ISerializer.cs" />
-    <Compile Include="Serialization\JsonSerializer.cs" />
     <Compile Include="Sockets\SocketAwaitable.cs" />
     <Compile Include="Sockets\SocketExtensions.cs" />
     <Compile Include="TcpConnection.cs" />
